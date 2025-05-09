@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import path, include
+from django.http import HttpResponse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api_logic.urls')),  # Including the API URLs
+    path('api/', include('api_logic.urls')), 
+    path('', lambda request: HttpResponse("Welcome to NadNeshtata API")),
 ]

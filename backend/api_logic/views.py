@@ -4,9 +4,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from .services.auth_service import register_user, get_user_data
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 
 
 class RegisterUserView(APIView):
+    
+    permission_classes = [AllowAny]
     def post(self, request):
         """
         Register a new user.

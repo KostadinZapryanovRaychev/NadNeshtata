@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
+
 def register_user(username, password, email):
     """
     Service to register a user.
