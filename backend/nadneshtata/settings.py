@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'knox',
 ]
 
 MIDDLEWARE = [
@@ -78,13 +80,11 @@ WSGI_APPLICATION = 'nadneshtata.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DJANGO_DB_NAME'),
-        # 'USER': os.getenv('DJANGO_DB_USER'),
-        # 'PASSWORD': os.getenv('DJANGO_DB_PASSWORD'),
-        'PASSWORD': 'blogpass',
-        'USER': 'bloguser',
-        'HOST': os.getenv('DJANGO_DB_HOST'),
-        'PORT': os.getenv('DJANGO_DB_PORT'),
+        'NAME': os.getenv('DJANGO_DB_NAME', 'blogdb'),
+        'USER': os.getenv('DJANGO_DB_USER', 'bloguser'),
+        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'blogpass'),
+        'HOST': os.getenv('DJANGO_DB_HOST', 'localhost'),
+        'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
     }
 }
 
@@ -106,10 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -119,12 +115,15 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'knox.auth.TokenAuthentication',  # Set Knox as the authentication method
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Default permission for API views
+    ),
+}
