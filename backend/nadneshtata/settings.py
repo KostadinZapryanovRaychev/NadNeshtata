@@ -54,7 +54,6 @@ MIDDLEWARE = [
 ]
 
 
-
 ROOT_URLCONF = 'nadneshtata.urls'
 
 TEMPLATES = [
@@ -127,9 +126,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'knox.auth.TokenAuthentication',  # Set Knox as the authentication method
+        'knox.auth.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',  # Default permission for API views
+        'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+SECURE_HASH_ALGORITHM = 'sha256'
+TOKEN_TTL = 86400
+AUTO_REFRESH = True
