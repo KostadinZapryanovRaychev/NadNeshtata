@@ -2,8 +2,10 @@ from sqlite3 import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
+from backend.api_logic.serializers import UserSerializer
 
-def register_user(username, password, email):
+
+def register_user(username, password, email, first_name, last_name):
     """
     Registers a new user with the provided username, password, and email.
 
@@ -23,7 +25,8 @@ def register_user(username, password, email):
         ValidationError: If a user with the provided username already exists.
     """
     try:
-        user = User(username=username, email=email)
+        user = User(first_name=first_name, last_name=last_name,
+                    username=username, email=email, is_active=False)
         user.set_password(password)
         user.save()
         return user
@@ -31,6 +34,7 @@ def register_user(username, password, email):
         raise ValidationError("Username is already taken.")
     except Exception as e:
         raise ValidationError(f"Failed to register user: {str(e)}")
+
 
 def get_user_data(user_id):
     """
@@ -50,7 +54,9 @@ def get_user_data(user_id):
         ValidationError: If no user with the given ID exists or other retrieval error occurs.
     """
     try:
-        return User.objects.get(id=user_id)
+        user = User.objects.get(id=user_id)
+        serializer = UserSerializer(user)
+        return serializer.data
     except User.DoesNotExist:
         raise ValidationError("User not found.")
     except Exception as e:
