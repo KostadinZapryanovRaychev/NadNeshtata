@@ -1,8 +1,7 @@
 from sqlite3 import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
-
-from backend.api_logic.serializers import UserSerializer
+from api_logic.serializers import UserSerializer
 
 
 def register_user(username, password, email, first_name, last_name):
