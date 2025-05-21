@@ -1,13 +1,10 @@
+from .services.auth_service import register_user, get_user_data
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
-
-from backend.api_logic.services.subscribe_service import (
-    subscribe_user, unsubscribe_user, get_user_subscription
-)
-from .services.auth_service import register_user, get_user_data
+from .services.subscription_service import get_user_subscription, subscribe_user, unsubscribe_user
 
 
 class RegisterUserView(APIView):
@@ -46,7 +43,7 @@ class UserSubscriptionView(APIView):
     def get(self, request, user_id):
         try:
             subscription = get_user_subscription(
-                user_id) 
+                user_id)
             return Response(subscription, status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -63,7 +60,7 @@ class UserSubscriptionView(APIView):
 
     def delete(self, request, user_id):
         try:
-            unsubscribe_user(user_id) 
+            unsubscribe_user(user_id)
             return Response({"detail": "User unsubscribed successfully."}, status=status.HTTP_204_NO_CONTENT)
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
