@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Subscription(models.Model):
     name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    interval = models.CharField(max_length=20)
+    interval = models.CharField(max_length=20, default='month')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
