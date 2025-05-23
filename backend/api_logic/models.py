@@ -1,9 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-
 class Subscription(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    name = models.CharField(max_length=100, unique=True, default='Basic Plan')
+    price = models.DecimalField(max_digits=8, decimal_places=2 , default='20.00')
     interval = models.CharField(max_length=20, default='month')
     created_at = models.DateTimeField(auto_now_add=True)
 
