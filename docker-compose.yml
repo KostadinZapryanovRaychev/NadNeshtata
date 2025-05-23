@@ -26,6 +26,7 @@ services:
       - DJANGO_DB_NAME=blogdb
       - DJANGO_DB_USER=bloguser
       - DJANGO_DB_PASSWORD=blogpass
+      - STRIPE_SECRET_KEY=your_secret_key
 
 volumes:
   postgres_data:
