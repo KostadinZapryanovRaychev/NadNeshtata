@@ -1,15 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny , IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import ValidationError
-from .services.auth_service import register_user, get_user_data
+from .services.auth_service import register_user, get_user_data, login_user
 from .services.subscription_service import (
     get_user_subscription,
     subscribe_user,
     unsubscribe_user
 )
 from .utils import HandleResponseUtils
+
 
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -26,6 +27,26 @@ class RegisterUserView(APIView):
             return HandleResponseUtils.handle_response(
                 status_code=201,
                 message={"detail": f"User {user.username} created successfully!"}
+            )
+        except KeyError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": str(e)})
+
+
+class LoginUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            user = login_user(
+                request=request,
+                username=request.data["username"],
+                password=request.data["password"]
+            )
+            return HandleResponseUtils.handle_response(
+                status_code=200,
+                message={"detail": f"User {user.username} logged in successfully!"}
             )
         except KeyError as e:
             return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})
@@ -74,4 +95,3 @@ class UserSubscriptionView(APIView):
             return HandleResponseUtils.handle_response(404, {"detail": "User has no active subscription."})
         except ValidationError as e:
             return HandleResponseUtils.handle_response(400, {"detail": str(e)})
-

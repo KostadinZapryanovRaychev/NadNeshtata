@@ -2,14 +2,16 @@ from sqlite3 import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from api_logic.serializers import UserSerializer
+from django.contrib.auth import authenticate, login
+from knox.models import AuthToken
 
 
 def register_user(username, password, email, first_name, last_name):
     """
     Registers a new user with the provided username, password, and email.
 
-    This function checks if the given username already exists in the system. 
-    If the username is available, it creates a new user using Django's built-in 
+    This function checks if the given username already exists in the system.
+    If the username is available, it creates a new user using Django's built-in
     user model (`User`) and returns the created user instance.
 
     Args:
@@ -39,8 +41,8 @@ def get_user_data(user_id):
     """
     Retrieves user data for a given user ID.
 
-    This function attempts to fetch a user from the database using the provided 
-    user ID. If the user exists, their user object is returned. If no user is 
+    This function attempts to fetch a user from the database using the provided
+    user ID. If the user exists, their user object is returned. If no user is
     found with the given ID, a ValidationError is raised.
 
     Args:
@@ -60,3 +62,129 @@ def get_user_data(user_id):
         raise ValidationError("User not found.")
     except Exception as e:
         raise ValidationError(f"Failed to retrieve user: {str(e)}")
+
+
+def login_user(request, username, password):
+    """
+    Logs in a user with the provided username and password.
+
+    This function checks if a user with the given username exists and verifies
+    the password. If the credentials are valid, it returns the user object.
+    If the user does not exist or the password is incorrect, a ValidationError
+    is raised.
+
+    Args:
+        request: The HTTP request object, used for authentication.
+        username (str): The username of the user trying to log in.
+        password (str): The password for the user account.
+
+    Returns:
+        User: The user object if login is successful.
+
+    Raises:
+        ValidationError: If the username does not exist or if the password is incorrect.
+    """
+    try:
+        if not username or not password:
+            raise ValidationError("Username and password are required.")
+
+        user = User.objects.get(username=username)
+
+        if not user.is_active:
+            raise ValidationError(
+                "User account is not active. Please activate your account first.")
+
+        flag = authenticate(request, username=username, password=password)
+        
+        if flag:
+            logged_devices = AuthToken.objects.filter(user=user).count()
+            if logged_devices >= 5:
+                raise ValidationError("Maximum number of devices logged in. Please log out from another device.")
+        
+        token = AuthToken.objects.create(user)
+        login(request, flag)    
+
+        user_info = {'username': f'{user.username}', 'token': f'{token[1]}'}
+        return user_info
+    except User.DoesNotExist:
+        raise ValidationError("Thr provided credentials are invalid.")
+
+
+def update_user_data(user_id, data):
+    """
+    Updates user data for a given user ID.
+
+    This function attempts to update the user information based on the provided 
+    data dictionary. It retrieves the user by ID, updates the fields, and saves 
+    the changes. If the user does not exist or if there are validation errors, 
+    appropriate exceptions are raised.
+
+    Args:
+        user_id (int): The unique identifier of the user to update.
+        data (dict): A dictionary containing the fields to update.
+
+    Returns:
+        User: The updated user object.
+
+    Raises:
+        ValidationError: If no user with the given ID exists or if there are validation errors.
+    """
+    try:
+        user = User.objects.get(id=user_id)
+        for key, value in data.items():
+            setattr(user, key, value)
+        user.save()
+        return user
+    except User.DoesNotExist:
+        raise ValidationError("User not found.")
+    except Exception as e:
+        raise ValidationError(f"Failed to update user: {str(e)}")
+
+
+def delete_user(user_id):
+    """
+    Deletes a user with the given user ID.
+
+    This function attempts to delete a user from the database using the provided 
+    user ID. If the user exists, they are deleted. If no user is found with the 
+    given ID, a ValidationError is raised.
+
+    Args:
+        user_id (int): The unique identifier of the user to delete.
+
+    Returns:
+        str: A success message indicating that the user has been deleted.
+
+    Raises:
+        ValidationError: If no user with the given ID exists or other deletion error occurs.
+    """
+    try:
+        user = User.objects.get(id=user_id)
+        user.delete()
+        return "User deleted successfully."
+    except User.DoesNotExist:
+        raise ValidationError("User not found.")
+    except Exception as e:
+        raise ValidationError(f"Failed to delete user: {str(e)}")
+
+
+def get_all_users():
+    """
+    Retrieves all users in the system.
+
+    This function fetches all user objects from the database and returns a list 
+    of serialized user data. If an error occurs during retrieval, a ValidationError 
+    is raised.
+
+    Returns:
+        list: A list of dictionaries containing user data.
+
+    Raises:
+        ValidationError: If there is an error retrieving users.
+    """
+    try:
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return serializer.data
+    except Exception as e:
+        raise ValidationError(f"Failed to retrieve users: {str(e)}")
