@@ -55,7 +55,7 @@ class LoginUserView(APIView):
 
 
 class GetUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
         try:
