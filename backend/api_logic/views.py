@@ -9,7 +9,7 @@ from .services.subscription_service import (
     subscribe_user,
     unsubscribe_user
 )
-from .utils import HandleResponseUtils, UserUtils
+from .utils import HandleResponseUtils
 
 
 class RegisterUserView(APIView):
@@ -23,6 +23,7 @@ class RegisterUserView(APIView):
                 email=request.data.get("email"),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
+                request=request
             )
             return HandleResponseUtils.handle_response(
                 status_code=201,

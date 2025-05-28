@@ -134,6 +134,17 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+email_host_secret = os.getenv('EMAIL_BACKEND_SECRET', "uewildelayeokyya")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_FROM = 'noreply.watchtogether@gmail.com'
+EMAIL_HOST_USER = 'noreply.watchtogether@gmail.com'
+EMAIL_HOST_PASSWORD = email_host_secret
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 SECURE_HASH_ALGORITHM = 'sha256'
 TOKEN_TTL = 86400
 AUTO_REFRESH = True

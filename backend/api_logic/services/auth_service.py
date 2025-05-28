@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from api_logic.serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
-from utils import UserUtils
+from api_logic.utils import UserUtils
 
 
 def register_user(username, password, email, first_name, last_name, request):
