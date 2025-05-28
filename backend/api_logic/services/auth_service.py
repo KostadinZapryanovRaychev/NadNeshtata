@@ -4,9 +4,10 @@ from rest_framework.exceptions import ValidationError
 from api_logic.serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
+from utils import UserUtils
 
 
-def register_user(username, password, email, first_name, last_name):
+def register_user(username, password, email, first_name, last_name, request):
     """
     Registers a new user with the provided username, password, and email.
 
@@ -18,6 +19,9 @@ def register_user(username, password, email, first_name, last_name):
         username (str): The desired username for the new user.
         password (str): The password for the new user account.
         email (str): The email address of the new user.
+        first_name (str): The first name of the new user.
+        last_name (str): The last name of the new user.
+        request (HttpRequest): The HTTP request object, used for sending emails.
 
     Returns:
         User: The newly created user object.
@@ -30,6 +34,8 @@ def register_user(username, password, email, first_name, last_name):
                     username=username, email=email, is_active=False)
         user.set_password(password)
         user.save()
+        UserUtils.send_email(request, mail_subject='Activate your account',
+                             template_path='account_activation_template.html', user=user, receiver=email)
         return user
     except IntegrityError:
         raise ValidationError("Username is already taken.")

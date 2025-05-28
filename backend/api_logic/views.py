@@ -9,7 +9,7 @@ from .services.subscription_service import (
     subscribe_user,
     unsubscribe_user
 )
-from .utils import HandleResponseUtils
+from .utils import HandleResponseUtils, UserUtils
 
 
 class RegisterUserView(APIView):
