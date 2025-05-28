@@ -18,9 +18,9 @@ class RegisterUserView(APIView):
     def post(self, request):
         try:
             user = register_user(
-                username=request.data["username"],
-                password=request.data["password"],
-                email=request.data["email"],
+                username=request.data.get("username"),
+                password=request.data.get("password"),
+                email=request.data.get("email"),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
             )
@@ -41,12 +41,15 @@ class LoginUserView(APIView):
         try:
             user = login_user(
                 request=request,
-                username=request.data["username"],
-                password=request.data["password"]
+                username=request.data.get("username"),
+                password=request.data.get("password")
             )
             return HandleResponseUtils.handle_response(
                 status_code=200,
-                message={"detail": f"User {user.username} logged in successfully!"}
+                message={
+                    "detail": f"User {user['username']} logged in successfully!",
+                    "token": user["token"]
+                }
             )
         except KeyError as e:
             return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})

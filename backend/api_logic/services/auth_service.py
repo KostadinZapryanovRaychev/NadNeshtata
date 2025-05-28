@@ -65,49 +65,32 @@ def get_user_data(user_id):
 
 
 def login_user(request, username, password):
-    """
-    Logs in a user with the provided username and password.
+    if not username or not password:
+        raise ValidationError("Username and password are required.")
 
-    This function checks if a user with the given username exists and verifies
-    the password. If the credentials are valid, it returns the user object.
-    If the user does not exist or the password is incorrect, a ValidationError
-    is raised.
-
-    Args:
-        request: The HTTP request object, used for authentication.
-        username (str): The username of the user trying to log in.
-        password (str): The password for the user account.
-
-    Returns:
-        User: The user object if login is successful.
-
-    Raises:
-        ValidationError: If the username does not exist or if the password is incorrect.
-    """
     try:
-        if not username or not password:
-            raise ValidationError("Username and password are required.")
-
         user = User.objects.get(username=username)
-
-        if not user.is_active:
-            raise ValidationError(
-                "User account is not active. Please activate your account first.")
-
-        flag = authenticate(request, username=username, password=password)
-        
-        if flag:
-            logged_devices = AuthToken.objects.filter(user=user).count()
-            if logged_devices >= 5:
-                raise ValidationError("Maximum number of devices logged in. Please log out from another device.")
-        
-        token = AuthToken.objects.create(user)
-        login(request, flag)    
-
-        user_info = {'username': f'{user.username}', 'token': f'{token[1]}'}
-        return user_info
     except User.DoesNotExist:
-        raise ValidationError("Thr provided credentials are invalid.")
+        raise ValidationError("The provided credentials are invalid.")
+
+    if not user.is_active:
+        raise ValidationError(
+            "User account is not active. Please activate your account first.")
+
+    flag = authenticate(request, username=username, password=password)
+
+    if not flag:
+        raise ValidationError("The provided credentials are invalid.")
+
+    logged_devices = AuthToken.objects.filter(user=user).count()
+    if logged_devices >= 5:
+        raise ValidationError(
+            "Maximum number of devices logged in. Please log out from another device.")
+
+    token = AuthToken.objects.create(user)
+    login(request, flag)
+
+    return {'username': user.username, 'token': token[1]}
 
 
 def update_user_data(user_id, data):
