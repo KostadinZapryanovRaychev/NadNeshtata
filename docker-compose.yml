@@ -22,11 +22,13 @@ services:
     depends_on:
       - db
     environment:
-      - DJANGO_DB_HOST=db
-      - DJANGO_DB_NAME=blogdb
-      - DJANGO_DB_USER=bloguser
-      - DJANGO_DB_PASSWORD=blogpass
-      - STRIPE_SECRET_KEY=your_secret_key
+      - DJANGO_DB_HOST=${DJANGO_DB_HOST}
+      - DJANGO_DB_NAME=${DJANGO_DB_NAME}
+      - DJANGO_DB_USER=${DJANGO_DB_USER}
+      - DJANGO_DB_PASSWORD=${DJANGO_DB_PASSWORD}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - EMAIL_BACKEND_SECRET=${EMAIL_BACKEND_SECRET}
+      - DJANGO_DB_PORT=${DJANGO_DB_PORT}
 
 volumes:
   postgres_data:
