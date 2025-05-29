@@ -6,7 +6,7 @@ from api_logic.models import Subscription , UserSubscription
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email' , 'first_name', 'last_name', 'is_active', 'date_joined']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

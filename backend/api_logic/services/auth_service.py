@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
 from api_logic.utils import UserUtils
 
+# TODO = to add confirmation by email and activation of the user account
+
 
 def register_user(username, password, email, first_name, last_name, request):
     """
@@ -30,12 +32,20 @@ def register_user(username, password, email, first_name, last_name, request):
         ValidationError: If a user with the provided username already exists.
     """
     try:
-        user = User(first_name=first_name, last_name=last_name,
-                    username=username, email=email, is_active=False)
+        # user = User(first_name=first_name, last_name=last_name,
+        #             username=username, email=email, is_active=False)
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            is_active=True
+        )
         user.set_password(password)
         user.save()
-        UserUtils.send_email(request, mail_subject='Activate your account',
-                             template_path='account_activation_template.html', user=user, receiver=email)
+        # UserUtils.send_email(request, mail_subject='Activate your account',
+        #                      template_path='account_activation_template.html', user=user, receiver=email)
         return user
     except IntegrityError:
         raise ValidationError("Username is already taken.")
