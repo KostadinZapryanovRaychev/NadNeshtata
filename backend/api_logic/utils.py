@@ -5,6 +5,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from .tokens import account_activation_token
 from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
+from django.contrib.auth.models import User
+import re
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
 class HandleResponseUtils(object):
@@ -49,6 +53,61 @@ class UserUtils(object):
     2. The methods here are related to user authentication
     3. The methods here are related to user email handling
     """
+
+    def validate_user_data(*, username: str, email: str,
+                           password: str, confirm_password: str) -> bool:
+        """
+        Validates registration input.
+
+        Rules
+        -----
+        • Username: ≥ 3 chars, only letters, digits, underscore (_), dot (.) or hyphen (-),
+        and must not already exist.
+        • Email: valid format and not already registered.
+        • Passwords: must match.
+
+        Raises
+        ------
+        rest_framework.exceptions.ValidationError
+            When one or more rules fail.  The exception's `.detail` is a dict
+            mapping field names to error messages (DRF will turn it into JSON).
+
+        Returns
+        -------
+        bool
+            True if everything is valid (never returns False—an invalid state raises).
+        """
+        errors = {}
+
+        # -------- username -------------------------------------------------
+        if len(username) < 3:
+            errors["username"] = "Username must be at least 3 characters long."
+        elif not re.fullmatch(r"^[\w.-]+$", username):
+            errors["username"] = (
+                "Username can only contain letters, numbers, "
+                "underscores (_), dots (.) and hyphens (-)."
+            )
+        elif User.objects.filter(username=username).exists():
+            errors["username"] = f"Username '{username}' is already taken."
+
+        # -------- email ----------------------------------------------------
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Invalid email format."
+        else:
+            if User.objects.filter(email=email).exists():
+                errors["email"] = f"Email '{email}' is already registered."
+
+        # -------- passwords ------------------------------------------------
+        if password != confirm_password:
+            errors["confirm_password"] = "Passwords do not match."
+
+        # -------- final ----------------------------------------------------
+        if errors:
+            raise ValidationError(errors)
+
+        return True
 
     def send_email(request, mail_subject: str, template_path: str, user: object, receiver: str) -> None:
         """

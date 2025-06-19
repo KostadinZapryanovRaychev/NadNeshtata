@@ -21,6 +21,7 @@ class RegisterUserView(APIView):
                 email=request.data.get("email"),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
+                confirm_password=request.data.get("confirm_password"),
                 request=request
             )
             return HandleResponseUtils.handle_response(

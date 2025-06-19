@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from api_logic.serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
+from api_logic.utils import UserUtils
 
 # TODO = to add confirmation by email and activation of the user account
 
@@ -34,14 +35,12 @@ def register_user(username, password, email, first_name, last_name, confirm_pass
     try:
         # user = User(first_name=first_name, last_name=last_name,
         #             username=username, email=email, is_active=False)
-        existing_email = User.objects.filter(email=email).first()
-        if existing_email:
-            raise ValidationError("Email is already registered.")
-        existing_user = User.objects.filter(username=username).first()
-        if existing_user:
-            raise ValidationError("Username is already taken.")
-        if password != confirm_password:
-            raise ValidationError("Passwords do not match.")
+        UserUtils.validate_user_data(
+            username=username,
+            email=email,
+            password=password,
+            confirm_password=confirm_password
+        )
         user = User.objects.create_user(
             username=username,
             password=password,
