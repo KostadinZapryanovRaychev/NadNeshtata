@@ -8,7 +8,7 @@ from .services.subscription_service import (
     unsubscribe_user
 )
 from .utils import HandleResponseUtils
-
+from knox.auth import TokenAuthentication
 
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -59,6 +59,7 @@ class LoginUserView(APIView):
 
 class GetUserView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request, user_id):
         try:
@@ -70,6 +71,7 @@ class GetUserView(APIView):
 
 class UserSubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request, user_id):
         try:
