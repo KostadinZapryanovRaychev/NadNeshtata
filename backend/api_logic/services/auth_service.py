@@ -4,7 +4,6 @@ from rest_framework.exceptions import ValidationError
 from api_logic.serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
-from api_logic.utils import UserUtils
 
 # TODO = to add confirmation by email and activation of the user account
 
