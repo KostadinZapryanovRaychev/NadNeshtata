@@ -8,7 +8,7 @@ from knox.models import AuthToken
 # TODO = to add confirmation by email and activation of the user account
 
 
-def register_user(username, password, email, first_name, last_name, request):
+def register_user(username, password, email, first_name, last_name, confirm_password, request):
     """
     Registers a new user with the provided username, password, and email.
 
@@ -22,6 +22,7 @@ def register_user(username, password, email, first_name, last_name, request):
         email (str): The email address of the new user.
         first_name (str): The first name of the new user.
         last_name (str): The last name of the new user.
+        confirm_password (str): The confirmation password to ensure the user entered it correctly.
         request (HttpRequest): The HTTP request object, used for sending emails.
 
     Returns:
@@ -33,6 +34,14 @@ def register_user(username, password, email, first_name, last_name, request):
     try:
         # user = User(first_name=first_name, last_name=last_name,
         #             username=username, email=email, is_active=False)
+        existing_email = User.objects.filter(email=email).first()
+        if existing_email:
+            raise ValidationError("Email is already registered.")
+        existing_user = User.objects.filter(username=username).first()
+        if existing_user:
+            raise ValidationError("Username is already taken.")
+        if password != confirm_password:
+            raise ValidationError("Passwords do not match.")
         user = User.objects.create_user(
             username=username,
             password=password,
