@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'knox',
+    'api_logic.apps.ApiLogicConfig',
 ]
 
 MIDDLEWARE = [
@@ -77,15 +78,14 @@ WSGI_APPLICATION = 'nadneshtata.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DJANGO_DB_NAME', 'blogdb'),
-        'USER': os.getenv('DJANGO_DB_USER', 'bloguser'),
-        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'blogpass'),
-        'HOST': os.getenv('DJANGO_DB_HOST', 'localhost'),
-        'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
+        'NAME': os.getenv('DJANGO_DB_NAME', ''),
+        'USER': os.getenv('DJANGO_DB_USER', ''),
+        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', ''),
+        'HOST': os.getenv('DJANGO_DB_HOST', ''),
+        'PORT': os.getenv('DJANGO_DB_PORT', ''),
     }
 }
 
@@ -132,6 +132,17 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+
+email_host_secret = os.getenv('EMAIL_BACKEND_SECRET', "")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_FROM = 'noreply.watchtogether@gmail.com'
+EMAIL_HOST_USER = 'noreply.watchtogether@gmail.com'
+EMAIL_HOST_PASSWORD = email_host_secret
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 SECURE_HASH_ALGORITHM = 'sha256'
 TOKEN_TTL = 86400
