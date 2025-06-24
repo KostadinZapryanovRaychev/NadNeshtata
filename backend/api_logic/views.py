@@ -9,6 +9,13 @@ from .services.subscription_service import (
 )
 from .utils import HandleResponseUtils
 from knox.auth import TokenAuthentication
+from .services.author_service import (
+    get_author_by_id,
+    update_author,
+    delete_author,
+    get_all_authors,
+)
+
 
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -100,3 +107,47 @@ class UserSubscriptionView(APIView):
             return HandleResponseUtils.handle_response(404, {"detail": "User has no active subscription."})
         except ValidationError as e:
             return HandleResponseUtils.handle_response(400, {"detail": str(e)})
+
+
+class AuthorProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        try:
+            author_data = {
+                "user": request.user,
+                "bio": request.data.get("bio", ""),
+                "profile_picture": request.data.get("profile_picture", "")
+            }
+            author = register_user(author_data)
+            return HandleResponseUtils.handle_response(201, {"detail": f"Author {author.user.username} created successfully!"})
+        except KeyError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": str(e)})
+
+    def get(self, request, author_id=None):
+        try:
+            if author_id:
+                author = get_author_by_id(author_id)
+                return HandleResponseUtils.handle_response(200, author)
+            else:
+                authors = get_all_authors()
+                return HandleResponseUtils.handle_response(200, authors)
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(404, {"detail": str(e)})
+
+    def put(self, request, author_id):
+        try:
+            updated_author = update_author(author_id, request.data)
+            return HandleResponseUtils.handle_response(200, updated_author)
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": str(e)})
+
+    def delete(self, request, author_id):
+        try:
+            message = delete_author(author_id)
+            return HandleResponseUtils.handle_response(204, message)
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(404, {"detail": str(e)})

@@ -142,3 +142,42 @@ class UserUtils(object):
             print("Email sending failed.")
             print(f"Email subject: {mail_subject}")
             return False
+        
+class AuthorUtils(object):
+    """This class holds methods related to author management:
+    1. The methods here are related to author management
+    """
+    
+    @staticmethod
+    def validate_author_data(*, bio: str, profile_picture: str) -> bool:
+        """
+        Validates author data.
+
+        Rules
+        -----
+        • Bio: can be empty or up to 500 characters.
+        • Profile picture: must be a valid URL.
+
+        Raises
+        ------
+        rest_framework.exceptions.ValidationError
+            When one or more rules fail. The exception's `.detail` is a dict
+            mapping field names to error messages (DRF will turn it into JSON).
+
+        Returns
+        -------
+        bool
+            True if everything is valid (never returns False—an invalid state raises).
+        """
+        errors = {}
+
+        if len(bio) > 500:
+            errors["bio"] = "Bio cannot exceed 500 characters."
+
+        if not re.match(r'^https?://', profile_picture):
+            errors["profile_picture"] = "Profile picture must be a valid URL."
+
+        if errors:
+            raise ValidationError(errors)
+
+        return True
