@@ -142,12 +142,13 @@ class UserUtils(object):
             print("Email sending failed.")
             print(f"Email subject: {mail_subject}")
             return False
-        
+
+
 class AuthorUtils(object):
     """This class holds methods related to author management:
     1. The methods here are related to author management
     """
-    
+
     @staticmethod
     def validate_author_data(*, bio: str, profile_picture: str) -> bool:
         """
@@ -176,6 +177,48 @@ class AuthorUtils(object):
 
         if not re.match(r'^https?://', profile_picture):
             errors["profile_picture"] = "Profile picture must be a valid URL."
+
+        if errors:
+            raise ValidationError(errors)
+
+        return True
+
+
+class ContentUtils(object):
+    """This class holds methods related to content management:
+    1. The methods here are related to content management
+    """
+
+    @staticmethod
+    def validate_content_data(*, title: str, body: str, author: str) -> bool:
+        """
+        Validates content data.
+
+        Rules
+        -----
+        • Title: must be at least 3 characters long.
+        • Body: must not be empty.
+
+        Raises
+        ------
+        rest_framework.exceptions.ValidationError
+            When one or more rules fail. The exception's `.detail` is a dict
+            mapping field names to error messages (DRF will turn it into JSON).
+        Returns
+        -------
+        bool
+            True if everything is valid (never returns False—an invalid state raises).
+        """
+        errors = {}
+
+        if len(title) < 3:
+            errors["title"] = "Title must be at least 3 characters long."
+
+        if not body.strip():
+            errors["body"] = "Body cannot be empty."
+
+        if not author:
+            errors["author"] = "Author must be specified."
 
         if errors:
             raise ValidationError(errors)

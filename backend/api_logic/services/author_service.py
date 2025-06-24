@@ -1,5 +1,4 @@
 from sqlite3 import IntegrityError
-from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from api_logic.serializers import AuthorSerializer
 from api_logic.utils import AuthorUtils
