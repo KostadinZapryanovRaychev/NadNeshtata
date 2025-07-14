@@ -116,7 +116,7 @@ class UserSubscriptionView(APIView):
             return HandleResponseUtils.handle_response(400, {"detail": str(e)})
 
 
-class AuthorProfileView(APIView):
+class AuthorView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
@@ -181,7 +181,11 @@ class ContentView(APIView):
             return HandleResponseUtils.handle_response(400, {"detail": str(e)})
 
     def get(self, request, content_id=None):
+
         try:
+            user_subscription = get_user_subscription(request.user.id)
+            if user_subscription and not user_subscription.get('is_active', False):
+                return HandleResponseUtils.handle_response(403, {"detail": "User subscription is not active."})
             if content_id:
                 content = get_content_by_id(content_id)
                 return HandleResponseUtils.handle_response(200, content)

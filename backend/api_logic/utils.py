@@ -176,9 +176,6 @@ class AuthorUtils(object):
         if len(bio) > 500:
             errors["bio"] = "Bio cannot exceed 500 characters."
 
-        if not re.match(r'^https?://', profile_picture):
-            errors["profile_picture"] = "Profile picture must be a valid URL."
-
         if errors:
             raise ValidationError(errors)
 
