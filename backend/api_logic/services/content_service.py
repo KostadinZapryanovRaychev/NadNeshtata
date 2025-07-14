@@ -10,17 +10,30 @@ def create_content(content_data):
     Create a new content item.
     """
     try:
+        name = content_data.get('name', '').strip()
+        description = content_data.get('description', '').strip()
+        author_id = content_data.get('author_id')
+
         ContentUtils.validate_content_data(
-            title=content_data.get('title', ''),
-            body=content_data.get('body', ''),
-            author=content_data.get('author', '')
+            name=name,
+            description=description,
+            author_id=author_id
         )
+
+        author = Author.objects.get(id=author_id)
+
         content = Content.objects.create(
-            title=content_data.get('title', ''),
-            body=content_data.get('body', ''),
-            author=content_data.get('author', '')
+            name=name,
+            description=description,
+            author=author,
+            url=content_data.get('url', ''),
+            thumbnail=content_data.get('thumbnail', '')
         )
+
         return content
+
+    except Author.DoesNotExist:
+        raise ValidationError({"author": "Author not found."})
     except IntegrityError as e:
         raise ValidationError(f"Content creation failed: {str(e)}")
 
@@ -38,19 +51,37 @@ def get_content_by_id(id):
         raise ValidationError(f"Failed to retrieve content: {str(e)}")
 
 
-def update_content(content_id, new_content_data):
+def update_content(content_id, content_data):
     """
     Update an existing content item.
     """
     try:
         content = Content.objects.get(id=content_id)
-        serializer = AuthorSerializer(
-            content, data=new_content_data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return serializer.data
-        else:
-            raise ValidationError(serializer.errors)
+
+        name = content_data.get('name', '').strip()
+        description = content_data.get('description', '').strip()
+        author_id = content_data.get('author_id')
+
+        ContentUtils.validate_content_data(
+            name=name,
+            description=description,
+            author_id=author_id
+        )
+
+        if author_id:
+            author = Author.objects.get(id=author_id)
+            content.author = author
+
+        content.name = name
+        content.description = description
+        content.url = content_data.get('url', content.url)
+        content.thumbnail = content_data.get('thumbnail', content.thumbnail)
+        content.save()
+
+        return content
+
+    except Author.DoesNotExist:
+        raise ValidationError({"author": "Author not found."})
     except Content.DoesNotExist:
         raise ValidationError("Content not found.")
     except Exception as e:

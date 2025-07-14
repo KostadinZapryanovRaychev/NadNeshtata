@@ -164,6 +164,22 @@ class ContentView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    def post(self, request):
+        try:
+            content_data = {
+                "name": request.data.get("name"),
+                "description": request.data.get("description", ""),
+                "author_id": request.data.get("author_id"),
+                "url": request.data.get("url"),
+                "thumbnail": request.data.get("thumbnail")
+            }
+            content = create_content(content_data)
+            return HandleResponseUtils.handle_response(201, {"detail": f"Content {content.name} created successfully!"})
+        except KeyError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})
+        except ValidationError as e:
+            return HandleResponseUtils.handle_response(400, {"detail": str(e)})
+
     def get(self, request, content_id=None):
         try:
             if content_id:
@@ -174,29 +190,6 @@ class ContentView(APIView):
                 return HandleResponseUtils.handle_response(200, contents)
         except ValidationError as e:
             return HandleResponseUtils.handle_response(404, {"detail": str(e)})
-#         try:
-#             if content_id:
-#                 content = get_content_by_id(content_id)
-#                 return HandleResponseUtils.handle_response(200, content)
-#             else:
-#                 contents = get_all_content()
-#                 return HandleResponseUtils.handle_response(200, contents)
-#         except ValidationError as e:
-#             return HandleResponseUtils.handle_response(404, {"detail": str(e)})
-#     def post(self, request):
-        try:
-            content_data = {
-                "name": request.data.get("name"),
-                "description": request.data.get("description", ""),
-                "author": request.user.author,
-                "url": request.data.get("url")
-            }
-            content = create_content(content_data)
-            return HandleResponseUtils.handle_response(201, {"detail": f"Content {content.name} created successfully!"})
-        except KeyError as e:
-            return HandleResponseUtils.handle_response(400, {"detail": f"Missing field: {str(e)}"})
-        except ValidationError as e:
-            return HandleResponseUtils.handle_response(400, {"detail": str(e)})
 
     def put(self, request, content_id):
         try:
@@ -211,8 +204,3 @@ class ContentView(APIView):
             return HandleResponseUtils.handle_response(204, message)
         except ValidationError as e:
             return HandleResponseUtils.handle_response(404, {"detail": str(e)})
-#         try:
-#             message = delete_content(content_id)
-#             return HandleResponseUtils.handle_response(204, message)
-#         except ValidationError as e:
-#             return HandleResponseUtils.handle_response(404, {"detail": str(e)})

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from .models import Author
 
 
 class HandleResponseUtils(object):
@@ -184,41 +185,34 @@ class AuthorUtils(object):
         return True
 
 
-class ContentUtils(object):
-    """This class holds methods related to content management:
-    1. The methods here are related to content management
-    """
+class ContentUtils:
+    """This class holds methods related to content management."""
 
     @staticmethod
-    def validate_content_data(*, title: str, body: str, author: str) -> bool:
+    def validate_content_data(*, name: str, description: str, author_id: int):
         """
         Validates content data.
 
         Rules
         -----
-        • Title: must be at least 3 characters long.
-        • Body: must not be empty.
+        • Name: must be at least 3 characters long.
+        • Description: optional, but must not exceed 2555 characters.
+        • Author: must exist.
 
         Raises
         ------
-        rest_framework.exceptions.ValidationError
-            When one or more rules fail. The exception's `.detail` is a dict
-            mapping field names to error messages (DRF will turn it into JSON).
-        Returns
-        -------
-        bool
-            True if everything is valid (never returns False—an invalid state raises).
+        ValidationError: with details for each invalid field.
         """
         errors = {}
 
-        if len(title) < 3:
-            errors["title"] = "Title must be at least 3 characters long."
+        if len(name.strip()) < 3:
+            errors["name"] = "Name must be at least 3 characters long."
 
-        if not body.strip():
-            errors["body"] = "Body cannot be empty."
+        if description and len(description) > 2555:
+            errors["description"] = "Description must be 2555 characters or fewer."
 
-        if not author:
-            errors["author"] = "Author must be specified."
+        if not Author.objects.filter(id=author_id).exists():
+            errors["author"] = "Author with this ID does not exist."
 
         if errors:
             raise ValidationError(errors)

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from api_logic.models import Subscription, UserSubscription, Author
+from api_logic.models import Subscription, UserSubscription, Author, Content
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,3 +37,12 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ['user', 'bio', 'profile_picture']
+
+
+class ContentSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True)
+
+    class Meta:
+        model = Content
+        fields = ['id', 'name', 'description', 'author',
+                  'created_at', 'updated_at', 'url', 'thumbnail']
