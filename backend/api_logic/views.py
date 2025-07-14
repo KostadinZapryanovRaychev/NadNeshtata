@@ -165,6 +165,7 @@ class ContentView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request):
+        '''Protect only for authors Create new content. Only for authors'''
         try:
             content_data = {
                 "name": request.data.get("name"),
@@ -196,6 +197,7 @@ class ContentView(APIView):
             return HandleResponseUtils.handle_response(404, {"detail": str(e)})
 
     def put(self, request, content_id):
+        '''Protect only for authors Create new content. Only for authors'''
         try:
             updated_content = update_content(content_id, request.data)
             return HandleResponseUtils.handle_response(200, updated_content)
@@ -203,6 +205,7 @@ class ContentView(APIView):
             return HandleResponseUtils.handle_response(400, {"detail": str(e)})
 
     def delete(self, request, content_id):
+        '''Protect only for authors Create new content. Only for authors'''
         try:
             message = delete_content(content_id)
             return HandleResponseUtils.handle_response(204, message)
