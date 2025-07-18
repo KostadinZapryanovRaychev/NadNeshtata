@@ -28,3 +28,28 @@ class UserSubscription(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.subscription.name}"
+
+
+class Author(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.URLField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.user.username
+
+    def get_absolute_url(self):
+        return f"/authors/{self.user.username}/"
+
+
+class Content(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(max_length=2555, blank=True)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    url = models.URLField(max_length=200, unique=True)
+    thumbnail = models.URLField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return self.name

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from .models import Author
 
 
 class HandleResponseUtils(object):
@@ -142,3 +143,75 @@ class UserUtils(object):
             print("Email sending failed.")
             print(f"Email subject: {mail_subject}")
             return False
+
+
+class AuthorUtils(object):
+    """This class holds methods related to author management:
+    1. The methods here are related to author management
+    """
+
+    @staticmethod
+    def validate_author_data(*, bio: str, profile_picture: str) -> bool:
+        """
+        Validates author data.
+
+        Rules
+        -----
+        • Bio: can be empty or up to 500 characters.
+        • Profile picture: must be a valid URL.
+
+        Raises
+        ------
+        rest_framework.exceptions.ValidationError
+            When one or more rules fail. The exception's `.detail` is a dict
+            mapping field names to error messages (DRF will turn it into JSON).
+
+        Returns
+        -------
+        bool
+            True if everything is valid (never returns False—an invalid state raises).
+        """
+        errors = {}
+
+        if len(bio) > 500:
+            errors["bio"] = "Bio cannot exceed 500 characters."
+
+        if errors:
+            raise ValidationError(errors)
+
+        return True
+
+
+class ContentUtils:
+    """This class holds methods related to content management."""
+
+    @staticmethod
+    def validate_content_data(*, name: str, description: str, author_id: int):
+        """
+        Validates content data.
+
+        Rules
+        -----
+        • Name: must be at least 3 characters long.
+        • Description: optional, but must not exceed 2555 characters.
+        • Author: must exist.
+
+        Raises
+        ------
+        ValidationError: with details for each invalid field.
+        """
+        errors = {}
+
+        if len(name.strip()) < 3:
+            errors["name"] = "Name must be at least 3 characters long."
+
+        if description and len(description) > 2555:
+            errors["description"] = "Description must be 2555 characters or fewer."
+
+        if not Author.objects.filter(id=author_id).exists():
+            errors["author"] = "Author with this ID does not exist."
+
+        if errors:
+            raise ValidationError(errors)
+
+        return True
